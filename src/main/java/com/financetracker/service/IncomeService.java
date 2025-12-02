@@ -121,6 +121,89 @@ public class IncomeService {
     }
 
     /**
+     * Get income by category
+     */
+    public List<Income> getIncomeByCategory(UUID userId, UUID categoryId) {
+        List<Income> incomes = new ArrayList<>();
+        String sql = "SELECT i.*, c.category_name, c.color_code " +
+                "FROM income i " +
+                "LEFT JOIN categories c ON i.category_id = c.category_id " +
+                "WHERE i.user_id = ? AND i.category_id = ? " +
+                "ORDER BY i.income_date DESC";
+
+        try (Connection conn = supabaseClient.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setObject(1, userId);
+            pstmt.setObject(2, categoryId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                incomes.add(mapResultSetToIncome(rs));
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error getting income by category", e);
+        }
+
+        return incomes;
+    }
+
+    /**
+     * Get recurring income entries
+     */
+    public List<Income> getRecurringIncome(UUID userId) {
+        List<Income> incomes = new ArrayList<>();
+        String sql = "SELECT i.*, c.category_name, c.color_code " +
+                "FROM income i " +
+                "LEFT JOIN categories c ON i.category_id = c.category_id " +
+                "WHERE i.user_id = ? AND i.is_recurring = true " +
+                "ORDER BY i.income_date DESC";
+
+        try (Connection conn = supabaseClient.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setObject(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                incomes.add(mapResultSetToIncome(rs));
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error getting recurring income", e);
+        }
+
+        return incomes;
+    }
+
+    /**
+     * Get income by ID
+     */
+    public Income getIncomeById(UUID incomeId) {
+        String sql = "SELECT i.*, c.category_name, c.color_code " +
+                "FROM income i " +
+                "LEFT JOIN categories c ON i.category_id = c.category_id " +
+                "WHERE i.income_id = ?";
+
+        try (Connection conn = supabaseClient.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setObject(1, incomeId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return mapResultSetToIncome(rs);
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error getting income by ID", e);
+        }
+
+        return null;
+    }
+
+    /**
      * Update an income entry
      */
     public boolean updateIncome(Income income) {
@@ -239,6 +322,64 @@ public class IncomeService {
     }
 
     /**
+     * Get monthly income totals for a year
+     */
+    public Map<String, BigDecimal> getMonthlyIncomeTotals(UUID userId, int year) {
+        Map<String, BigDecimal> result = new HashMap<>();
+        String sql = "SELECT TO_CHAR(income_date, 'YYYY-MM') as month, COALESCE(SUM(amount), 0) as total " +
+                "FROM income " +
+                "WHERE user_id = ? AND EXTRACT(YEAR FROM income_date) = ? " +
+                "GROUP BY TO_CHAR(income_date, 'YYYY-MM') " +
+                "ORDER BY month";
+
+        try (Connection conn = supabaseClient.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setObject(1, userId);
+            pstmt.setInt(2, year);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                result.put(rs.getString("month"), rs.getBigDecimal("total"));
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error getting monthly income totals", e);
+        }
+
+        return result;
+    }
+
+    /**
+     * Search income by source
+     */
+    public List<Income> searchIncomeBySource(UUID userId, String searchTerm) {
+        List<Income> incomes = new ArrayList<>();
+        String sql = "SELECT i.*, c.category_name, c.color_code " +
+                "FROM income i " +
+                "LEFT JOIN categories c ON i.category_id = c.category_id " +
+                "WHERE i.user_id = ? AND LOWER(i.source) LIKE LOWER(?) " +
+                "ORDER BY i.income_date DESC";
+
+        try (Connection conn = supabaseClient.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setObject(1, userId);
+            pstmt.setString(2, "%" + searchTerm + "%");
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                incomes.add(mapResultSetToIncome(rs));
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error searching income by source", e);
+        }
+
+        return incomes;
+    }
+
+    /**
      * Map ResultSet to Income object
      */
     private Income mapResultSetToIncome(ResultSet rs) throws SQLException {
@@ -266,6 +407,7 @@ public class IncomeService {
         income.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         income.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
 
+        // Joined fields - handle potential absence
         try {
             income.setCategoryName(rs.getString("category_name"));
         } catch (SQLException e) {
