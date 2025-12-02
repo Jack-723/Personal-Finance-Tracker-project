@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.financetracker.controller.IncomeController"
+      spacing="20" styleClass="main-content">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Header Section -->
+    <HBox spacing="20" alignment="CENTER_LEFT">
+        <VBox spacing="5">
+            <Label text="Income Management" styleClass="page-title">
+                <font><Font size="24" name="System Bold"/></font>
+            </Label>
+            <Label text="Track and manage your income sources" styleClass="subtitle">
+                <font><Font size="13"/></font>
+            </Label>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="+ Add Income" onAction="#handleAddIncome" styleClass="primary-button" prefHeight="40">
+            <font><Font size="14"/></font>
+        </Button>
+    </HBox>
+
+    <!-- Summary Cards -->
+    <HBox spacing="20">
+        <!-- Monthly Income Card -->
+        <VBox spacing="10" styleClass="summary-card" HBox.hgrow="ALWAYS">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="This Month's Income" styleClass="card-title">
+                <font><Font size="13"/></font>
+            </Label>
+            <Label fx:id="monthlyIncomeLabel" text="0.00" styleClass="income-value">
+                <font><Font size="28" name="System Bold"/></font>
+            </Label>
+        </VBox>
+
+        <!-- Total (Filtered) Income Card -->
+        <VBox spacing="10" styleClass="summary-card" HBox.hgrow="ALWAYS">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="Total (Filtered)" styleClass="card-title">
+                <font><Font size="13"/></font>
+            </Label>
+            <Label fx:id="totalIncomeLabel" text="0.00" styleClass="card-value">
+                <font><Font size="28" name="System Bold"/></font>
+            </Label>
+        </VBox>
+    </HBox>
+
+    <!-- Filters Section -->
+    <HBox spacing="15" alignment="CENTER_LEFT" styleClass="filter-section">
+        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+
+        <Label text="Filter:">
+            <font><Font size="13"/></font>
+        </Label>
+        <ComboBox fx:id="filterComboBox" prefWidth="150"/>
+
+        <Label text="From:">
+            <font><Font size="13"/></font>
+        </Label>
+        <DatePicker fx:id="fromDatePicker" prefWidth="130"/>
+
+        <Label text="To:">
+            <font><Font size="13"/></font>
+        </Label>
+        <DatePicker fx:id="toDatePicker" prefWidth="130"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <TextField fx:id="searchField" promptText="Search by source..." prefWidth="200"/>
+
+        <Button text="Refresh" onAction="#handleRefresh" styleClass="secondary-button"/>
+    </HBox>
+
+    <!-- Income Table -->
+    <VBox VBox.vgrow="ALWAYS" styleClass="content-section">
+        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+
+        <TableView fx:id="incomeTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="dateColumn" text="Date" prefWidth="120"/>
+                <TableColumn fx:id="sourceColumn" text="Source" prefWidth="200"/>
+                <TableColumn fx:id="categoryColumn" text="Category" prefWidth="150"/>
+                <TableColumn fx:id="amountColumn" text="Amount" prefWidth="120"/>
+                <TableColumn fx:id="recurringColumn" text="Recurring" prefWidth="120"/>
+            </columns>
+            <placeholder>
+                <Label text="No income entries found. Click '+ Add Income' to add your first entry."/>
+            </placeholder>
+        </TableView>
+    </VBox>
+
+    <!-- Action Buttons -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Edit Selected" onAction="#handleEditIncome" styleClass="secondary-button"/>
+        <Button text="Delete Selected" onAction="#handleDeleteIncome" styleClass="danger-button"/>
+    </HBox>
+</VBox>

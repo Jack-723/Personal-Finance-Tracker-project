@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.financetracker.controller.LoginController"
+           styleClass="login-container" prefWidth="800" prefHeight="600">
+
+    <VBox alignment="CENTER" spacing="30">
+
+        <!-- App Title -->
+        <VBox alignment="CENTER" spacing="5">
+            <Label text="💰 Finance Tracker" styleClass="app-title">
+                <font><Font size="36" name="System Bold"/></font>
+            </Label>
+            <Label text="Personal Finance &amp; Budget Management" styleClass="app-subtitle">
+                <font><Font size="14"/></font>
+            </Label>
+        </VBox>
+
+        <!-- Login Form -->
+        <VBox fx:id="loginForm" spacing="20" styleClass="login-form" maxWidth="400">
+            <padding><Insets top="30" right="40" bottom="30" left="40"/></padding>
+
+            <Label text="Sign In" alignment="CENTER" maxWidth="Infinity">
+                <font><Font size="20" name="System Bold"/></font>
+            </Label>
+
+            <!-- Email Field -->
+            <VBox spacing="5">
+                <Label text="Email" styleClass="field-label">
+                    <font><Font size="13"/></font>
+                </Label>
+                <TextField fx:id="emailField" promptText="Enter your email" prefHeight="40">
+                    <font><Font size="14"/></font>
+                </TextField>
+            </VBox>
+
+            <!-- Password Field -->
+            <VBox spacing="5">
+                <Label text="Password" styleClass="field-label">
+                    <font><Font size="13"/></font>
+                </Label>
+                <PasswordField fx:id="passwordField" promptText="Enter your password" prefHeight="40">
+                    <font><Font size="14"/></font>
+                </PasswordField>
+            </VBox>
+
+            <!-- Forgot Password Link -->
+            <HBox alignment="CENTER_RIGHT">
+                <Label text="Forgot Password?" styleClass="link-label" onMouseClicked="#handleForgotPassword">
+                    <font><Font size="12"/></font>
+                </Label>
+            </HBox>
+
+            <!-- Error Label -->
+            <Label fx:id="errorLabel" text="" styleClass="error-label" wrapText="true" visible="false">
+                <font><Font size="12"/></font>
+            </Label>
+
+            <!-- Login Button -->
+            <Button fx:id="loginButton" text="Sign In" onAction="#handleLogin"
+                    styleClass="primary-button" prefHeight="45" maxWidth="Infinity">
+                <font><Font size="15" name="System Bold"/></font>
+            </Button>
+
+            <!-- Progress Indicator -->
+            <HBox alignment="CENTER">
+                <ProgressIndicator fx:id="progressIndicator" prefWidth="30" prefHeight="30" visible="false"/>
+            </HBox>
+
+            <!-- Register Link -->
+            <HBox alignment="CENTER" spacing="5">
+                <Label text="Don't have an account?" styleClass="normal-text">
+                    <font><Font size="13"/></font>
+                </Label>
+                <Label text="Sign Up" styleClass="link-label" onMouseClicked="#handleShowRegister">
+                    <font><Font size="13" name="System Bold"/></font>
+                </Label>
+            </HBox>
+        </VBox>
+
+        <!-- Registration Form (hidden by default) -->
+        <VBox fx:id="registerForm" spacing="20" styleClass="login-form" maxWidth="400"
+              visible="false" managed="false">
+            <padding><Insets top="30" right="40" bottom="30" left="40"/></padding>
+
+            <Label text="Create Account" alignment="CENTER" maxWidth="Infinity">
+                <font><Font size="20" name="System Bold"/></font>
+            </Label>
+
+            <!-- Name Field -->
+            <VBox spacing="5">
+                <Label text="Full Name" styleClass="field-label">
+                    <font><Font size="13"/></font>
+                </Label>
+                <TextField fx:id="regNameField" promptText="Enter your name" prefHeight="40">
+                    <font><Font size="14"/></font>
+                </TextField>
+            </VBox>
+
+            <!-- Email Field -->
+            <VBox spacing="5">
+                <Label text="Email" styleClass="field-label">
+                    <font><Font size="13"/></font>
+                </Label>
+                <TextField fx:id="regEmailField" promptText="Enter your email" prefHeight="40">
+                    <font><Font size="14"/></font>
+                </TextField>
+            </VBox>
+
+            <!-- Password Field -->
+            <VBox spacing="5">
+                <Label text="Password" styleClass="field-label">
+                    <font><Font size="13"/></font>
+                </Label>
+                <PasswordField fx:id="regPasswordField" promptText="Minimum 8 characters" prefHeight="40">
+                    <font><Font size="14"/></font>
+                </PasswordField>
+            </VBox>
+
+            <!-- Confirm Password Field -->
+            <VBox spacing="5">
+                <Label text="Confirm Password" styleClass="field-label">
+                    <font><Font size="13"/></font>
+                </Label>
+                <PasswordField fx:id="regConfirmPasswordField" promptText="Re-enter password" prefHeight="40">
+                    <font><Font size="14"/></font>
+                </PasswordField>
+            </VBox>
+
+            <!-- Register Button -->
+            <Button text="Create Account" onAction="#handleRegister"
+                    styleClass="primary-button" prefHeight="45" maxWidth="Infinity">
+                <font><Font size="15" name="System Bold"/></font>
+            </Button>
+
+            <!-- Back to Login Link -->
+            <HBox alignment="CENTER" spacing="5">
+                <Label text="Already have an account?" styleClass="normal-text">
+                    <font><Font size="13"/></font>
+                </Label>
+                <Label text="Sign In" styleClass="link-label" onMouseClicked="#handleShowLogin">
+                    <font><Font size="13" name="System Bold"/></font>
+                </Label>
+            </HBox>
+        </VBox>
+
+        <!-- Connection Status -->
+        <HBox alignment="CENTER">
+            <Label fx:id="connectionStatus" text="● Checking connection..." styleClass="connection-status">
+                <font><Font size="11"/></font>
+            </Label>
+        </HBox>
+    </VBox>
+</StackPane>
