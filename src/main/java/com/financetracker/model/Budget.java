@@ -1,6 +1,7 @@
 package com.financetracker.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -171,7 +172,7 @@ public class Budget {
         if (amountLimit != null && spentAmount != null) {
             remainingAmount = amountLimit.subtract(spentAmount);
             if (amountLimit.compareTo(BigDecimal.ZERO) > 0) {
-                percentageUsed = spentAmount.divide(amountLimit, 4, BigDecimal.ROUND_HALF_UP)
+                percentageUsed = spentAmount.divide(amountLimit, 4, RoundingMode.HALF_UP)
                         .multiply(BigDecimal.valueOf(100))
                         .doubleValue();
             }
