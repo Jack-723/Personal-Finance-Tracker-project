@@ -4,12 +4,14 @@ import com.financetracker.MainApp;
 import com.financetracker.model.User;
 import com.financetracker.service.UserService;
 import com.financetracker.util.SupabaseClient;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +38,7 @@ public class LoginController {
     @FXML private ProgressIndicator loadingIndicator;
     @FXML private Label connectionStatusLabel;
 
-    // FXML Components - Registration (if using combined view)
+    // FXML Components - Registration
     @FXML private VBox loginForm;
     @FXML private VBox registerForm;
     @FXML private TextField regEmailField;
@@ -161,7 +163,6 @@ public class LoginController {
                 logger.info("Attempting login for: {}", email);
 
                 // Step 1: Authenticate with Supabase Auth
-                // This validates credentials against Supabase's auth.users table
                 logger.info("Step 1: Authenticating with Supabase Auth...");
                 try {
                     boolean authSuccess = supabaseClient.signIn(email, password);
@@ -175,13 +176,11 @@ public class LoginController {
                 }
 
                 // Step 2: Get user from our application's users table
-                // The users table stores additional profile info (name, preferences, etc.)
                 logger.info("Step 2: Fetching user profile from database...");
                 User user = userService.getUserByEmail(email);
 
                 if (user == null) {
                     // User exists in Supabase Auth but not in our users table
-                    // This can happen if user was created directly in Supabase dashboard
                     logger.warn("User authenticated but not found in users table");
 
                     // Auto-create user profile in our table
@@ -192,8 +191,6 @@ public class LoginController {
                     user.setCurrencyPreference("USD");
                     user.setActive(true);
 
-                    // We don't store password in our table - Supabase Auth handles that
-                    // Just create a placeholder hash or use Supabase user ID
                     boolean created = userService.createUserWithoutPassword(user);
 
                     if (created) {
@@ -270,9 +267,6 @@ public class LoginController {
             registerForm.setVisible(true);
             registerForm.setManaged(true);
             hideError();
-        } else {
-            // If forms aren't separate, show a dialog
-            showRegistrationDialog();
         }
     }
 
@@ -296,74 +290,78 @@ public class LoginController {
      * Handle registration form submission
      *
      * Supabase Auth Registration Flow:
-     * 1. Create user in Supabase Auth (handles password hashing, email verification)
-     * 2. Create corresponding user profile in our 'users' table
-     * 3. User may need to confirm email before logging in (depending on Supabase settings)
+     * 1. Validate all input fields
+     * 2. Create user in Supabase Auth (handles password hashing, email verification)
+     * 3. Create corresponding user profile in our 'users' table
+     * 4. User may need to confirm email before logging in (depending on Supabase settings)
      */
     @FXML
     private void handleRegister() {
-        String email = regEmailField != null ? regEmailField.getText().trim() : "";
-        String name = regNameField != null ? regNameField.getText().trim() : "";
-        String password = regPasswordField != null ? regPasswordField.getText() : "";
-        String confirmPassword = regConfirmPasswordField != null ? regConfirmPasswordField.getText() : "";
+        logger.info("handleRegister method called");
 
-        // Validate input
-        if (email.isEmpty()) {
-            showError("Email is required");
+        // Get values from registration form
+        String email = regEmailField.getText().trim();
+        String name = regNameField.getText().trim();
+        String password = regPasswordField.getText();
+        String confirmPassword = regConfirmPasswordField.getText();
+
+        // Validate all fields are filled
+        if (email.isEmpty() || name.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            showError("Please fill in all fields");
             return;
         }
 
+        // Validate email format
         if (!isValidEmail(email)) {
             showError("Please enter a valid email address");
             return;
         }
 
-        if (password.isEmpty()) {
-            showError("Password is required");
+        // Validate password length
+        if (password.length() < 8) {
+            showError("Password must be at least 8 characters long");
             return;
         }
 
-        if (password.length() < 6) {
-            showError("Password must be at least 6 characters");
-            return;
-        }
-
+        // Validate passwords match
         if (!password.equals(confirmPassword)) {
             showError("Passwords do not match");
             return;
         }
 
+        // Show loading state
         setLoading(true);
         hideError();
 
+        // Perform registration in background thread
         Task<Boolean> registerTask = new Task<>() {
             @Override
             protected Boolean call() throws Exception {
                 logger.info("Attempting registration for: {}", email);
 
-                // Step 1: Register with Supabase Auth
-                // This creates user in auth.users and handles password hashing
-                logger.info("Step 1: Creating user in Supabase Auth...");
+                // Step 1: Create auth user in Supabase
+                logger.info("Step 1: Creating Supabase Auth user...");
                 boolean authCreated = supabaseClient.signUp(email, password);
 
                 if (!authCreated) {
-                    throw new Exception("Failed to create account. Email may already be registered.");
+                    throw new IOException("Failed to create auth user");
                 }
-                logger.info("✓ User created in Supabase Auth");
+                logger.info("✓ Supabase Auth user created");
 
-                // Step 2: Create user profile in our users table
+                // Step 2: Create user profile in local database
                 logger.info("Step 2: Creating user profile in database...");
                 User newUser = new User();
                 newUser.setEmail(email);
-                newUser.setFullName(name.isEmpty() ? extractNameFromEmail(email) : name);
+                newUser.setFullName(name);
                 newUser.setCurrencyPreference("USD");
                 newUser.setActive(true);
 
                 boolean profileCreated = userService.createUserWithoutPassword(newUser);
 
                 if (!profileCreated) {
-                    logger.warn("User created in Auth but failed to create profile");
-                    // Still return true - user can login and profile will be auto-created
+                    logger.warn("User profile creation returned false, but may already exist");
+                } else {
+                    logger.info("✓ User profile created in database");
                 }
 
                 logger.info("✓ Registration successful for: {}", email);
@@ -372,16 +370,29 @@ public class LoginController {
         };
 
         registerTask.setOnSucceeded(event -> {
+            Boolean success = registerTask.getValue();
             Platform.runLater(() -> {
                 setLoading(false);
-                if (registerTask.getValue()) {
-                    showSuccess("Account created successfully! Please check your email to confirm, then log in.");
-                    handleShowLogin();
+                if (success) {
+                    showSuccess("Account created successfully! Please check your email to verify your account.");
 
-                    // Pre-fill email field for convenience
+                    // Pre-fill login email for convenience
                     if (emailField != null) {
                         emailField.setText(email);
                     }
+
+                    // Clear registration form
+                    regEmailField.clear();
+                    regNameField.clear();
+                    regPasswordField.clear();
+                    regConfirmPasswordField.clear();
+
+                    // Show login form after 2 seconds
+                    PauseTransition pause = new PauseTransition(Duration.seconds(2));
+                    pause.setOnFinished(e -> handleShowLogin());
+                    pause.play();
+                } else {
+                    showError("Registration failed. Please try again.");
                 }
             });
         });
@@ -391,130 +402,23 @@ public class LoginController {
             logger.error("Registration failed", ex);
             Platform.runLater(() -> {
                 setLoading(false);
-                String errorMsg = ex != null ? ex.getMessage() : "Registration failed";
+                String errorMsg = ex.getMessage();
 
-                if (errorMsg.contains("already registered") || errorMsg.contains("already exists")) {
-                    showError("An account with this email already exists.");
+                // Parse common Supabase error messages
+                if (errorMsg.contains("User already registered")) {
+                    showError("This email is already registered. Try signing in instead.");
+                } else if (errorMsg.contains("Invalid email")) {
+                    showError("Please enter a valid email address");
+                } else if (errorMsg.contains("Password should be at least")) {
+                    showError("Password must be at least 8 characters long");
                 } else {
-                    showError(errorMsg);
+                    showError("Registration failed: " + errorMsg);
                 }
             });
         });
 
+        // Start the registration task
         new Thread(registerTask).start();
-    }
-
-    /**
-     * Show registration dialog (alternative to separate form)
-     */
-    private void showRegistrationDialog() {
-        Dialog<User> dialog = new Dialog<>();
-        dialog.setTitle("Create Account");
-        dialog.setHeaderText("Register for Finance Tracker");
-
-        ButtonType registerButtonType = new ButtonType("Register", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(registerButtonType, ButtonType.CANCEL);
-
-        // Create form fields
-        VBox content = new VBox(10);
-        content.setStyle("-fx-padding: 20;");
-
-        TextField nameField = new TextField();
-        nameField.setPromptText("Full Name");
-
-        TextField emailField = new TextField();
-        emailField.setPromptText("Email");
-
-        PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText("Password (min 6 characters)");
-
-        PasswordField confirmField = new PasswordField();
-        confirmField.setPromptText("Confirm Password");
-
-        content.getChildren().addAll(
-                new Label("Full Name:"), nameField,
-                new Label("Email:"), emailField,
-                new Label("Password:"), passwordField,
-                new Label("Confirm Password:"), confirmField
-        );
-
-        dialog.getDialogPane().setContent(content);
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == registerButtonType) {
-                // Validate
-                if (emailField.getText().isEmpty() || passwordField.getText().isEmpty()) {
-                    showError("Email and password are required");
-                    return null;
-                }
-                if (!passwordField.getText().equals(confirmField.getText())) {
-                    showError("Passwords do not match");
-                    return null;
-                }
-                if (passwordField.getText().length() < 6) {
-                    showError("Password must be at least 6 characters");
-                    return null;
-                }
-
-                // Set the registration fields and trigger registration
-                if (regEmailField != null) regEmailField.setText(emailField.getText());
-                if (regNameField != null) regNameField.setText(nameField.getText());
-                if (regPasswordField != null) regPasswordField.setText(passwordField.getText());
-                if (regConfirmPasswordField != null) regConfirmPasswordField.setText(confirmField.getText());
-
-                // Create temp user object to signal success
-                User tempUser = new User();
-                tempUser.setEmail(emailField.getText());
-                tempUser.setFullName(nameField.getText());
-                return tempUser;
-            }
-            return null;
-        });
-
-        dialog.showAndWait().ifPresent(user -> {
-            // Perform registration with dialog values
-            performRegistration(user.getEmail(), user.getFullName(),
-                    confirmField.getText()); // Using confirmField as it has the password
-        });
-    }
-
-    /**
-     * Perform registration with provided values
-     */
-    private void performRegistration(String email, String name, String password) {
-        setLoading(true);
-
-        Task<Boolean> task = new Task<>() {
-            @Override
-            protected Boolean call() throws Exception {
-                boolean authCreated = supabaseClient.signUp(email, password);
-                if (authCreated) {
-                    User newUser = new User();
-                    newUser.setEmail(email);
-                    newUser.setFullName(name);
-                    userService.createUserWithoutPassword(newUser);
-                    return true;
-                }
-                return false;
-            }
-        };
-
-        task.setOnSucceeded(e -> {
-            setLoading(false);
-            if (task.getValue()) {
-                showSuccess("Account created! Check your email to confirm.");
-                if (this.emailField != null) {
-                    this.emailField.setText(email);
-                }
-            }
-        });
-
-        task.setOnFailed(e -> {
-            setLoading(false);
-            showError("Registration failed: " + task.getException().getMessage());
-        });
-
-        new Thread(task).start();
     }
 
     /**

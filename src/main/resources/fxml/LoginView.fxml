@@ -69,7 +69,7 @@
 
             <!-- Progress Indicator -->
             <HBox alignment="CENTER">
-                <ProgressIndicator fx:id="progressIndicator" prefWidth="30" prefHeight="30" visible="false"/>
+                <ProgressIndicator fx:id="loadingIndicator" prefWidth="30" prefHeight="30" visible="false"/>
             </HBox>
 
             <!-- Register Link -->
@@ -151,7 +151,7 @@
 
         <!-- Connection Status -->
         <HBox alignment="CENTER">
-            <Label fx:id="connectionStatus" text="● Checking connection..." styleClass="connection-status">
+            <Label fx:id="connectionStatusLabel" text="● Checking connection..." styleClass="connection-status">
                 <font><Font size="11"/></font>
             </Label>
         </HBox>
