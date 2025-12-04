@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.financetracker.controller.AnalyticsController"
+            fitToWidth="true" styleClass="main-content">
+
+    <VBox spacing="20">
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
+
+        <!-- Header Section -->
+        <HBox spacing="20" alignment="CENTER_LEFT">
+            <VBox spacing="5">
+                <Label text="Analytics Dashboard" styleClass="page-title">
+                    <font><Font size="24" name="System Bold"/></font>
+                </Label>
+                <Label text="Visualize your financial data and trends" styleClass="subtitle">
+                    <font><Font size="13"/></font>
+                </Label>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Refresh" onAction="#handleRefresh" styleClass="secondary-button"/>
+        </HBox>
+
+        <!-- Filters Section -->
+        <HBox spacing="15" alignment="CENTER_LEFT" styleClass="filter-section">
+            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+            <Label text="Period:">
+                <font><Font size="13"/></font>
+            </Label>
+            <ComboBox fx:id="periodComboBox" prefWidth="150"/>
+            <Label text="Year:">
+                <font><Font size="13"/></font>
+            </Label>
+            <ComboBox fx:id="yearComboBox" prefWidth="100"/>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+
+        <!-- Summary Cards -->
+        <HBox spacing="20">
+            <VBox spacing="10" styleClass="summary-card" prefWidth="180">
+                <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                <Label text="Total Income" styleClass="card-title">
+                    <font><Font size="13"/></font>
+                </Label>
+                <Label fx:id="totalIncomeLabel" text="\$0.00" styleClass="income-value">
+                    <font><Font size="24" name="System Bold"/></font>
+                </Label>
+            </VBox>
+
+            <VBox spacing="10" styleClass="summary-card" prefWidth="180">
+                <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                <Label text="Total Expenses" styleClass="card-title">
+                    <font><Font size="13"/></font>
+                </Label>
+                <Label fx:id="totalExpensesLabel" text="\$0.00" styleClass="expense-value">
+                    <font><Font size="24" name="System Bold"/></font>
+                </Label>
+            </VBox>
+
+            <VBox spacing="10" styleClass="summary-card" prefWidth="180">
+                <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                <Label text="Net Savings" styleClass="card-title">
+                    <font><Font size="13"/></font>
+                </Label>
+                <Label fx:id="netSavingsLabel" text="\$0.00" styleClass="card-value">
+                    <font><Font size="24" name="System Bold"/></font>
+                </Label>
+            </VBox>
+
+
+            <VBox spacing="10" styleClass="summary-card" prefWidth="180">
+                <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                <Label text="Savings Rate" styleClass="card-title">
+                    <font><Font size="13"/></font>
+                </Label>
+                <Label fx:id="savingsRateLabel" text="0%" styleClass="card-value">
+                    <font><Font size="24" name="System Bold"/></font>
+                </Label>
+            </VBox>
+        </HBox>
+
+        <!-- Charts Row 1: Pie Charts -->
+        <HBox spacing="20">
+            <!-- Expenses by Category Pie Chart -->
+            <VBox styleClass="content-section" HBox.hgrow="ALWAYS">
+                <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+                <PieChart fx:id="expenseByCategoryChart" prefHeight="300" prefWidth="400"/>
+            </VBox>
+
+            <!-- Income by Category Pie Chart -->
+            <VBox styleClass="content-section" HBox.hgrow="ALWAYS">
+                <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+                <PieChart fx:id="incomeByCategoryChart" prefHeight="300" prefWidth="400"/>
+            </VBox>
+        </HBox>
+
+        <!-- Charts Row 2: Bar Chart -->
+        <VBox styleClass="content-section">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+            <BarChart fx:id="incomeExpenseBarChart" prefHeight="350">
+                <xAxis>
+                    <CategoryAxis fx:id="barChartXAxis"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis fx:id="barChartYAxis"/>
+                </yAxis>
+            </BarChart>
+        </VBox>
+
+        <!-- Charts Row 3: Line Chart -->
+        <VBox styleClass="content-section">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+            <LineChart fx:id="trendLineChart" prefHeight="350">
+                <xAxis>
+                    <CategoryAxis fx:id="lineChartXAxis"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis fx:id="lineChartYAxis"/>
+                </yAxis>
+            </LineChart>
+        </VBox>
+
+    </VBox>
+</ScrollPane>
