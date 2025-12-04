@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.financetracker.controller.AccountController"
+      spacing="20" styleClass="main-content">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Header Section -->
+    <HBox spacing="20" alignment="CENTER_LEFT">
+        <VBox spacing="5">
+            <Label text="Accounts" styleClass="page-title">
+                <font><Font size="24" name="System Bold"/></font>
+            </Label>
+            <Label text="Manage your bank accounts, credit cards, and cash" styleClass="subtitle">
+                <font><Font size="13"/></font>
+            </Label>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="+ Add Account" onAction="#handleAddAccount" styleClass="primary-button" prefHeight="40">
+            <font><Font size="14"/></font>
+        </Button>
+    </HBox>
+
+    <!-- Summary Cards -->
+    <HBox spacing="20">
+        <VBox spacing="10" styleClass="summary-card" prefWidth="200">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="Net Worth" styleClass="card-title">
+                <font><Font size="13"/></font>
+            </Label>
+            <Label fx:id="netWorthLabel" text="\$0.00" styleClass="card-value">
+                <font><Font size="28" name="System Bold"/></font>
+            </Label>
+        </VBox>
+
+        <VBox spacing="10" styleClass="summary-card" prefWidth="200">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="Total Assets" styleClass="card-title">
+                <font><Font size="13"/></font>
+            </Label>
+            <Label fx:id="totalAssetsLabel" text="\$0.00" styleClass="income-value">
+                <font><Font size="28" name="System Bold"/></font>
+            </Label>
+        </VBox>
+
+        <VBox spacing="10" styleClass="summary-card" prefWidth="200">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="Total Liabilities" styleClass="card-title">
+                <font><Font size="13"/></font>
+            </Label>
+            <Label fx:id="totalLiabilitiesLabel" text="\$0.00" styleClass="expense-value">
+                <font><Font size="28" name="System Bold"/></font>
+            </Label>
+        </VBox>
+
+    </HBox>
+
+    <!-- Filters Section -->
+    <HBox spacing="15" alignment="CENTER_LEFT" styleClass="filter-section">
+        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+        <Label text="Show:">
+            <font><Font size="13"/></font>
+        </Label>
+        <ComboBox fx:id="filterComboBox" prefWidth="150"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <TextField fx:id="searchField" promptText="Search by name, institution, or type..." prefWidth="250"/>
+
+        <Button text="Refresh" onAction="#handleRefresh" styleClass="secondary-button"/>
+    </HBox>
+
+    <!-- Accounts Table -->
+    <VBox VBox.vgrow="ALWAYS" styleClass="content-section">
+        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+        <TableView fx:id="accountTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="nameColumn" text="Account Name" prefWidth="180"/>
+                <TableColumn fx:id="typeColumn" text="Type" prefWidth="100"/>
+                <TableColumn fx:id="institutionColumn" text="Institution" prefWidth="140"/>
+                <TableColumn fx:id="accountNumberColumn" text="Account #" prefWidth="100"/>
+                <TableColumn fx:id="balanceColumn" text="Balance" prefWidth="120"/>
+                <TableColumn fx:id="currencyColumn" text="Currency" prefWidth="70"/>
+                <TableColumn fx:id="statusColumn" text="Status" prefWidth="80"/>
+            </columns>
+            <placeholder>
+                <Label text="No accounts found. Click '+ Add Account' to add your first account."/>
+            </placeholder>
+        </TableView>
+    </VBox>
+
+    <!-- Action Buttons -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Update Balance" onAction="#handleUpdateBalance" styleClass="primary-button"/>
+        <Button text="Edit Selected" onAction="#handleEditAccount" styleClass="secondary-button"/>
+        <Button text="Delete Selected" onAction="#handleDeleteAccount" styleClass="danger-button"/>
+    </HBox>
+</VBox>
