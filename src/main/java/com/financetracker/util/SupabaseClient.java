@@ -1,5 +1,7 @@
 package com.financetracker.util;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import okhttp3.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -8,12 +10,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Supabase Client Manager for handling authentication and database connections
+ * Supabase Client Manager with Connection Pooling
+ * Uses HikariCP for efficient connection management to prevent "Max client connections reached" errors
  */
 public class SupabaseClient {
     private static final Logger logger = LoggerFactory.getLogger(SupabaseClient.class);
@@ -31,6 +33,9 @@ public class SupabaseClient {
     private String currentUserId;
     private String currentUserEmail;
 
+    // Connection pool (HikariCP)
+    private HikariDataSource dataSource;
+
     private SupabaseClient() {
         ConfigManager config = ConfigManager.getInstance();
         this.supabaseUrl = config.getSupabaseUrl();
@@ -47,7 +52,47 @@ public class SupabaseClient {
 
         this.gson = new Gson();
 
-        logger.info("SupabaseClient initialized");
+        // Initialize connection pool
+        initializeConnectionPool();
+
+        logger.info("SupabaseClient initialized with connection pooling");
+    }
+
+    /**
+     * Initialize HikariCP connection pool
+     * Prevents "Max client connections reached" by reusing connections
+     */
+    private void initializeConnectionPool() {
+        try {
+            HikariConfig config = new HikariConfig();
+            config.setJdbcUrl(dbUrl);
+            config.setUsername(dbUsername);
+            config.setPassword(dbPassword);
+            config.setDriverClassName("org.postgresql.Driver");
+
+            // Connection pool settings optimized for Supabase
+            config.setMaximumPoolSize(10);          // Max 10 connections (Supabase free tier limit)
+            config.setMinimumIdle(2);                // Keep 2 connections ready
+            config.setConnectionTimeout(30000);      // 30 seconds to get connection
+            config.setIdleTimeout(600000);           // 10 minutes idle before closing
+            config.setMaxLifetime(1800000);          // 30 minutes max connection lifetime
+            config.setLeakDetectionThreshold(60000); // Warn if connection held > 60s
+
+            // Performance optimizations
+            config.addDataSourceProperty("cachePrepStmts", "true");
+            config.addDataSourceProperty("prepStmtCacheSize", "250");
+            config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+
+            // Health check query
+            config.setConnectionTestQuery("SELECT 1");
+
+            dataSource = new HikariDataSource(config);
+            logger.info("✓ Connection pool initialized successfully (MaxSize: 10, MinIdle: 2)");
+
+        } catch (Exception e) {
+            logger.error("✗ Failed to initialize connection pool", e);
+            throw new RuntimeException("Failed to initialize database connection pool", e);
+        }
     }
 
     public static SupabaseClient getInstance() {
@@ -62,7 +107,61 @@ public class SupabaseClient {
     }
 
     /**
-     * Sign up a new user (original method with full name)
+     * Get a database connection from the pool
+     * CRITICAL: Always use try-with-resources to ensure connection is returned to pool!
+     *
+     * Example:
+     * try (Connection conn = supabaseClient.getConnection()) {
+     *     // Use connection
+     * } // Connection automatically returned to pool
+     */
+    public Connection getConnection() throws SQLException {
+        if (dataSource == null) {
+            throw new SQLException("Connection pool not initialized");
+        }
+
+        Connection conn = dataSource.getConnection();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Connection obtained from pool - Active: {}, Idle: {}, Total: {}",
+                    dataSource.getHikariPoolMXBean().getActiveConnections(),
+                    dataSource.getHikariPoolMXBean().getIdleConnections(),
+                    dataSource.getHikariPoolMXBean().getTotalConnections());
+        }
+
+        return conn;
+    }
+
+    /**
+     * Get connection pool statistics
+     * Useful for monitoring and debugging
+     */
+    public String getPoolStats() {
+        if (dataSource == null) {
+            return "Connection pool not initialized";
+        }
+
+        return String.format("Pool Stats - Active: %d, Idle: %d, Total: %d, Waiting: %d",
+                dataSource.getHikariPoolMXBean().getActiveConnections(),
+                dataSource.getHikariPoolMXBean().getIdleConnections(),
+                dataSource.getHikariPoolMXBean().getTotalConnections(),
+                dataSource.getHikariPoolMXBean().getThreadsAwaitingConnection());
+    }
+
+    /**
+     * Shutdown connection pool
+     * Should be called when application exits
+     */
+    public void shutdown() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            logger.info("Shutting down connection pool...");
+            dataSource.close();
+            logger.info("✓ Connection pool closed successfully");
+        }
+    }
+
+    /**
+     * Sign up a new user (with full name metadata)
      */
     public JsonObject signUp(String email, String password, String fullName) throws IOException {
         JsonObject requestBody = new JsonObject();
@@ -115,7 +214,7 @@ public class SupabaseClient {
     }
 
     /**
-     * Sign up a new user (simplified - returns boolean for LoginController compatibility)
+     * Sign up a new user (simplified - returns boolean)
      */
     public boolean signUp(String email, String password) throws IOException {
         JsonObject requestBody = new JsonObject();
@@ -172,7 +271,7 @@ public class SupabaseClient {
     }
 
     /**
-     * Sign in an existing user (original method returning JsonObject)
+     * Sign in an existing user (returns full response)
      */
     public JsonObject signInAndGetResponse(String email, String password) throws IOException {
         JsonObject requestBody = new JsonObject();
@@ -221,7 +320,7 @@ public class SupabaseClient {
     }
 
     /**
-     * Sign in an existing user (returns boolean for LoginController compatibility)
+     * Sign in an existing user (simplified - returns boolean)
      */
     public boolean signIn(String email, String password) throws IOException {
         JsonObject requestBody = new JsonObject();
@@ -324,56 +423,6 @@ public class SupabaseClient {
     }
 
     /**
-     * Get the current user's access token
-     */
-    public String getCurrentUserToken() {
-        return currentUserToken;
-    }
-
-    /**
-     * Get the current user's ID
-     */
-    public String getCurrentUserId() {
-        return currentUserId;
-    }
-
-    /**
-     * Get the current user's email
-     */
-    public String getCurrentUserEmail() {
-        return currentUserEmail;
-    }
-
-    /**
-     * Check if a user is currently signed in
-     */
-    public boolean isUserSignedIn() {
-        return currentUserToken != null && currentUserId != null;
-    }
-
-    /**
-     * Check if authenticated (alias for isUserSignedIn)
-     */
-    public boolean isAuthenticated() {
-        return isUserSignedIn();
-    }
-
-    /**
-     * Get a database connection
-     */
-    public Connection getConnection() throws SQLException {
-        try {
-            Class.forName("org.postgresql.Driver");
-            Connection conn = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
-            logger.debug("Database connection established");
-            return conn;
-        } catch (ClassNotFoundException e) {
-            logger.error("PostgreSQL JDBC Driver not found", e);
-            throw new SQLException("PostgreSQL JDBC Driver not found", e);
-        }
-    }
-
-    /**
      * Execute a REST API call to Supabase
      */
     public JsonObject executeRestCall(String endpoint, String method, JsonObject body) throws IOException {
@@ -428,6 +477,45 @@ public class SupabaseClient {
                 throw new IOException("REST call failed: " + responseBody);
             }
         }
+    }
+
+    // ============================================
+    // Getters
+    // ============================================
+
+    /**
+     * Get the current user's access token
+     */
+    public String getCurrentUserToken() {
+        return currentUserToken;
+    }
+
+    /**
+     * Get the current user's ID
+     */
+    public String getCurrentUserId() {
+        return currentUserId;
+    }
+
+    /**
+     * Get the current user's email
+     */
+    public String getCurrentUserEmail() {
+        return currentUserEmail;
+    }
+
+    /**
+     * Check if a user is currently signed in
+     */
+    public boolean isUserSignedIn() {
+        return currentUserToken != null && currentUserId != null;
+    }
+
+    /**
+     * Check if authenticated (alias for isUserSignedIn)
+     */
+    public boolean isAuthenticated() {
+        return isUserSignedIn();
     }
 
     /**
