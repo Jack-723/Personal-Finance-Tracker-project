@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.financetracker.controller.BillController"
+      spacing="20" styleClass="main-content">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Header Section -->
+    <HBox spacing="20" alignment="CENTER_LEFT">
+        <VBox spacing="5">
+            <Label text="Bills &amp; Subscriptions" styleClass="page-title">
+                <font><Font size="24" name="System Bold"/></font>
+            </Label>
+            <Label text="Manage your recurring bills and subscriptions" styleClass="subtitle">
+                <font><Font size="13"/></font>
+            </Label>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="+ Add Bill" onAction="#handleAddBill" styleClass="primary-button" prefHeight="40">
+            <font><Font size="14"/></font>
+        </Button>
+    </HBox>
+
+    <!-- Summary Cards -->
+    <HBox spacing="20">
+        <VBox spacing="10" styleClass="summary-card" prefWidth="200">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            <Label text="Monthly Total" styleClass="card-title">
+                <font><Font size="13"/></font>
+            </Label>
+            <Label fx:id="monthlyTotalLabel" text="\$0.00" styleClass="expense-value">
+                <font><Font size="28" name="System Bold"/></font>
+            </Label>
+
+        </VBox>
+
+        <VBox spacing="10" styleClass="summary-card" prefWidth="200">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="Active Bills" styleClass="card-title">
+                <font><Font size="13"/></font>
+            </Label>
+            <Label fx:id="activeBillsLabel" text="0" styleClass="income-value">
+                <font><Font size="28" name="System Bold"/></font>
+            </Label>
+        </VBox>
+
+        <VBox spacing="10" styleClass="summary-card" prefWidth="200">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="Due Soon / Overdue" styleClass="card-title">
+                <font><Font size="13"/></font>
+            </Label>
+            <Label fx:id="dueSoonLabel" text="0" styleClass="card-value">
+                <font><Font size="28" name="System Bold"/></font>
+            </Label>
+        </VBox>
+    </HBox>
+
+    <!-- Filters Section -->
+    <HBox spacing="15" alignment="CENTER_LEFT" styleClass="filter-section">
+        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+        <Label text="Show:">
+            <font><Font size="13"/></font>
+        </Label>
+        <ComboBox fx:id="filterComboBox" prefWidth="150"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <TextField fx:id="searchField" promptText="Search by name, vendor, or category..." prefWidth="250"/>
+
+        <Button text="Refresh" onAction="#handleRefresh" styleClass="secondary-button"/>
+    </HBox>
+
+    <!-- Bills Table -->
+    <VBox VBox.vgrow="ALWAYS" styleClass="content-section">
+        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+        <TableView fx:id="billTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="nameColumn" text="Bill Name" prefWidth="150"/>
+                <TableColumn fx:id="vendorColumn" text="Vendor" prefWidth="120"/>
+                <TableColumn fx:id="amountColumn" text="Amount" prefWidth="100"/>
+                <TableColumn fx:id="cycleColumn" text="Cycle" prefWidth="90"/>
+                <TableColumn fx:id="nextDueColumn" text="Next Due" prefWidth="150"/>
+                <TableColumn fx:id="statusColumn" text="Status" prefWidth="100"/>
+                <TableColumn fx:id="categoryColumn" text="Category" prefWidth="100"/>
+            </columns>
+            <placeholder>
+                <Label text="No bills found. Click '+ Add Bill' to add your first recurring bill or subscription."/>
+            </placeholder>
+        </TableView>
+    </VBox>
+
+    <!-- Action Buttons -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Mark as Paid" onAction="#handleMarkAsPaid" styleClass="primary-button"/>
+        <Button text="Edit Selected" onAction="#handleEditBill" styleClass="secondary-button"/>
+        <Button text="Delete Selected" onAction="#handleDeleteBill" styleClass="danger-button"/>
+    </HBox>
+</VBox>
