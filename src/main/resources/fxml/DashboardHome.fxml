@@ -1,106 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      spacing="20" alignment="TOP_CENTER" styleClass="main-content">
+      alignment="CENTER" spacing="20" styleClass="main-content">
 
     <padding>
-        <Insets top="30" right="30" bottom="30" left="30"/>
+        <Insets top="50" right="20" bottom="50" left="20"/>
     </padding>
 
-    <!-- Welcome Header -->
-    <VBox spacing="10" alignment="CENTER">
-        <Label text="Welcome to Finance Tracker" styleClass="page-title">
-            <font><Font size="28" name="System Bold"/></font>
-        </Label>
-        <Label text="Your personal finance management dashboard" styleClass="subtitle">
-            <font><Font size="14"/></font>
-        </Label>
-    </VBox>
+    <Label text="Welcome to your Finance Tracker App">
+        <font><Font size="28" name="System Bold"/></font>
+    </Label>
 
-    <!-- Summary Cards Row -->
-    <HBox spacing="20" alignment="CENTER">
-        <padding><Insets top="20"/></padding>
-
-        <!-- Total Balance Card -->
-        <VBox spacing="10" styleClass="summary-card" prefWidth="200">
-            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-            <Label text="Total Balance" styleClass="card-title">
-                <font><Font size="12"/></font>
-            </Label>
-            <Label text="$0.00" styleClass="card-value">
-                <font><Font size="24" name="System Bold"/></font>
-            </Label>
-        </VBox>
-
-        <!-- Monthly Income Card -->
-        <VBox spacing="10" styleClass="summary-card" prefWidth="200">
-            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-            <Label text="Monthly Income" styleClass="card-title">
-                <font><Font size="12"/></font>
-            </Label>
-            <Label text="$0.00" styleClass="income-value">
-                <font><Font size="24" name="System Bold"/></font>
-            </Label>
-        </VBox>
-
-        <!-- Monthly Expenses Card -->
-        <VBox spacing="10" styleClass="summary-card" prefWidth="200">
-            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-            <Label text="Monthly Expenses" styleClass="card-title">
-                <font><Font size="12"/></font>
-            </Label>
-            <Label text="$0.00" styleClass="expense-value">
-                <font><Font size="24" name="System Bold"/></font>
-            </Label>
-        </VBox>
-
-        <!-- Savings Card -->
-        <VBox spacing="10" styleClass="summary-card" prefWidth="200">
-            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-            <Label text="Monthly Savings" styleClass="card-title">
-                <font><Font size="12"/></font>
-            </Label>
-            <Label text="$0.00" styleClass="card-value">
-                <font><Font size="24" name="System Bold"/></font>
-            </Label>
-        </VBox>
-    </HBox>
-
-    <!-- Quick Actions Section -->
-    <VBox spacing="15" alignment="CENTER">
-        <padding><Insets top="30"/></padding>
-
-        <Label text="Quick Actions" styleClass="section-title">
-            <font><Font size="16" name="System Bold"/></font>
-        </Label>
-
-        <HBox spacing="15" alignment="CENTER">
-            <Button text="+ Add Income" styleClass="primary-button" prefWidth="150" prefHeight="40"/>
-            <Button text="+ Add Expense" styleClass="secondary-button" prefWidth="150" prefHeight="40"/>
-            <Button text="+ Set Budget" styleClass="secondary-button" prefWidth="150" prefHeight="40"/>
-            <Button text="View Reports" styleClass="secondary-button" prefWidth="150" prefHeight="40"/>
-        </HBox>
-    </VBox>
-
-    <!-- Recent Activity Section -->
-    <VBox spacing="10" VBox.vgrow="ALWAYS">
-        <padding><Insets top="30"/></padding>
-
-        <Label text="Recent Activity" styleClass="section-title">
-            <font><Font size="16" name="System Bold"/></font>
-        </Label>
-
-        <VBox styleClass="content-section" VBox.vgrow="ALWAYS">
-            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-            <Label text="No recent transactions. Start by adding your first income or expense!"
-                   styleClass="placeholder-text" alignment="CENTER" maxWidth="Infinity">
-                <font><Font size="13"/></font>
-            </Label>
-        </VBox>
-    </VBox>
 </VBox>
