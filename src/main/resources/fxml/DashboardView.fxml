@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.financetracker.controller.DashboardController"
+            styleClass="dashboard-container">
+
+    <!-- Top Bar -->
+    <top>
+        <HBox spacing="20" alignment="CENTER_LEFT" styleClass="top-bar">
+            <padding><Insets top="15" right="20" bottom="15" left="20"/></padding>
+
+            <Label text="💰 Finance Tracker" styleClass="app-title">
+                <font><Font size="20" name="System Bold"/></font>
+            </Label>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label fx:id="dateLabel" text="Today's Date" styleClass="date-label">
+                <font><Font size="13"/></font>
+            </Label>
+
+            <Separator orientation="VERTICAL"/>
+
+            <Label fx:id="welcomeLabel" text="Welcome!" styleClass="welcome-label">
+                <font><Font size="14"/></font>
+            </Label>
+
+            <Button text="Logout" onAction="#handleLogout" styleClass="logout-button"/>
+        </HBox>
+    </top>
+
+    <!-- Left Navigation -->
+    <left>
+        <VBox fx:id="navMenu" spacing="5" styleClass="nav-menu" prefWidth="220">
+            <padding><Insets top="20" right="15" bottom="20" left="15"/></padding>
+
+            <Label text="MAIN MENU" styleClass="menu-header">
+                <font><Font size="11"/></font>
+            </Label>
+            <VBox.margin><Insets bottom="10"/></VBox.margin>
+
+            <Button fx:id="dashboardBtn" text="📊  Dashboard" onAction="#handleDashboard"
+                    styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
+                <font><Font size="14"/></font>
+            </Button>
+
+            <Button fx:id="incomeBtn" text="💵  Income" onAction="#handleIncome"
+                    styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
+                <font><Font size="14"/></font>
+            </Button>
+
+            <Button fx:id="expensesBtn" text="💸  Expenses" onAction="#handleExpenses"
+                    styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
+                <font><Font size="14"/></font>
+            </Button>
+
+            <Button fx:id="budgetsBtn" text="📋  Budgets" onAction="#handleBudgets"
+                    styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
+                <font><Font size="14"/></font>
+            </Button>
+
+            <Button fx:id="billsBtn" text="📅  Bills" onAction="#handleBills"
+                    styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
+                <font><Font size="14"/></font>
+            </Button>
+
+            <Button fx:id="accountsBtn" text="🏦  Accounts" onAction="#handleAccounts"
+                    styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
+                <font><Font size="14"/></font>
+            </Button>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Separator/>
+            <VBox.margin><Insets top="10" bottom="10"/></VBox.margin>
+
+            <Label text="REPORTS" styleClass="menu-header">
+                <font><Font size="11"/></font>
+            </Label>
+
+            <Button fx:id="analyticsBtn" text="📈  Analytics" onAction="#handleAnalytics"
+                    styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
+                <font><Font size="14"/></font>
+            </Button>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Separator/>
+            <VBox.margin><Insets top="10" bottom="10"/></VBox.margin>
+
+            <Button fx:id="settingsBtn" text="⚙️  Settings" onAction="#handleSettings"
+                    styleClass="nav-button" maxWidth="Infinity" alignment="CENTER_LEFT">
+                <font><Font size="14"/></font>
+            </Button>
+        </VBox>
+    </left>
+
+    <!-- Main Content Area -->
+    <center>
+        <StackPane fx:id="contentArea" styleClass="main-content">
+            <padding><Insets top="0" right="0" bottom="0" left="0"/></padding>
+        </StackPane>
+    </center>
+</BorderPane>
