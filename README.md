@@ -236,6 +236,8 @@ For issues and questions:
 - Family account sharing
 - Cloud backup and sync
 
+
+## GITHUB REPO: https://github.com/Jack-723/Personal-Finance-Tracker-project.git
 ---
 
 **Version**: 1.0.0  
